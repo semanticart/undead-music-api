@@ -58,3 +58,7 @@ get '/api/genres/list.json' do
   genres = Artist.all(:conditions => {:verified => true}).map{|a| a.genres}.flatten
   genres.inject({}){|hash,g| hash[g] ||= 0; hash[g] += 1; hash}.to_json
 end
+
+get '/' do
+  erb :index
+end
