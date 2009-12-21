@@ -22,7 +22,16 @@ post '/api/suggestions' do
   # url
 end
 
+get '/api/artists/list.json' do
+  list
+end
+
 post '/api/artists/list.json' do
+  list
+end
+
+# we share a method for show and list since we want them accessible via POST and GET
+def list
   if params[:mbids]
     Artist.updated_versions_of(:all_with_mids, params[:mbids].split('|'))
   elsif params[:names]
@@ -34,7 +43,6 @@ post '/api/artists/list.json' do
   end.to_json
 end
 
-# we share a method for show since we want it accessible via POST and GET
 def show
   if params[:mbid]
     Artist.first(:conditions => {:mid => params[:mbid]})
