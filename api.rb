@@ -16,22 +16,20 @@ not_found do
   {:error => "404: Not found"}.to_json
 end
 
+# borrowed from http://blog.nuclearsquid.com/writings/multi-routing
+def get_or_post(url, verbs = %w(get post), &block)
+  verbs.each do |verb|
+    send(verb, url, &block)
+  end
+end
+
 post '/api/suggestions' do
   # new suggestion
   # artist id
   # url
 end
 
-get '/api/artists/list.json' do
-  list
-end
-
-post '/api/artists/list.json' do
-  list
-end
-
-# we share a method for show and list since we want them accessible via POST and GET
-def list
+get_or_post '/api/artists/list.json' do
   if params[:mbids]
     Artist.updated_versions_of(:all_with_mids, params[:mbids].split('|'))
   elsif params[:names]
@@ -43,7 +41,7 @@ def list
   end.to_json
 end
 
-def show
+get_or_post '/api/artists/show.json' do
   if params[:mbid]
     Artist.first(:conditions => {:mid => params[:mbid]})
   elsif params[:name]
@@ -51,14 +49,6 @@ def show
   else
     {:error => "You must specify a name or mbid in your params"}
   end.to_json
-end
-
-post '/api/artists/show.json' do
-  show
-end
-
-get '/api/artists/show.json' do
-  show
 end
 
 get '/api/genres/list.json' do
