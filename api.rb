@@ -51,10 +51,10 @@ get_or_post '/api/artists/show.json' do
   end.to_json
 end
 
-get '/api/genres/list.json' do
+get '/api/tags/list.json' do
   # TODO: cache this
-  genres = Artist.all(:conditions => {:verified => true}).map{|a| a.genres}.flatten
-  genres.inject({}){|hash,g| hash[g] ||= 0; hash[g] += 1; hash}.to_json
+  tags = Artist.all(:conditions => {:verified => true}).map{|a| a.tags}.flatten
+  tags.inject({}){|hash,g| hash[g] ||= 0; hash[g] += 1; hash}.to_json
 end
 
 get '/' do

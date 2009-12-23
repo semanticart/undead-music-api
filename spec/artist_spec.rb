@@ -58,4 +58,70 @@ describe Artist do
       Artist.all_with_name_or_alias(["Some unknown artist"])
     end
   end
+
+  context "#update_attributes_from_last_fm!" do
+    def sample_artist last_fm
+      Artist.new(:name => "something", :aliases => [], :last_fm => last_fm)
+    end
+
+    it "raises no errors if the xml is missing nodes" do
+      a = sample_artist("<xml></xml>")
+      lambda{
+        a.update_attributes_from_last_fm!
+      }.should_not raise_error
+    end
+
+    it "updates the thumbnail if one is provided in the xml" do
+      a = sample_artist(%(<xml><image size="medium">http://something/1.jpg</image></xml>))
+      lambda{
+        a.update_attributes_from_last_fm!
+      }.should change(a, :thumbnail).from(nil).to("http://something/1.jpg")
+    end
+
+    it "updates the tags if they are provided in the xml" do
+      a = sample_artist(%(<xml><artist><tags><tag><name>something</name></tag><tag><name>something else</name></tag></tags></artist></xml>))
+      lambda{
+        a.update_attributes_from_last_fm!
+      }.should change(a, :tags).from([]).to(["something", "something else"])
+    end
+
+    it "updates the last_fm_url if it is provided in the xml" do
+      a = sample_artist(%(<xml><url>http://www.last.fm/music/Journey</url></xml>))
+      lambda{
+        a.update_attributes_from_last_fm!
+      }.should change(a, :last_fm_url).from(nil).to("http://www.last.fm/music/Journey")
+    end
+
+    context "mid" do
+      MBID_PRESENT = %(<xml><mbid>1234567</mbid></xml>)
+
+      it "updates the mid if you pass true and a mbid is present in the xml" do
+        a = sample_artist(MBID_PRESENT)
+        lambda{
+          a.update_attributes_from_last_fm!(true)
+        }.should change(a, :mid).from(nil).to('1234567')
+      end
+
+      it "does not update the mid if you pass it false" do
+        a = sample_artist(MBID_PRESENT)
+        lambda{
+          a.update_attributes_from_last_fm!
+        }.should_not change(a, :mid)
+      end
+
+      it "does not update the mid if you pass true but no mbid is present in the xml" do
+        a = sample_artist(%(<xml></xml>))
+        lambda{
+          a.update_attributes_from_last_fm!(true)
+        }.should_not change(a, :mid)
+      end
+
+      it "does not update hte mid if you pass true but the mbid is blank in the xml" do
+        a = sample_artist(%(<xml><mbid></mbid></xml>))
+        lambda{
+          a.update_attributes_from_last_fm!(true)
+        }.should_not change(a, :mid)
+      end
+    end
+  end
 end

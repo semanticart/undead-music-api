@@ -1,6 +1,6 @@
 class Artist
   LAST_FM_KEY = JSON.load(File.read(File.dirname(__FILE__) + "/../config.json"))['last_fm_key']
-  JSON_EXCLUSIONS = %w(last_fm last_fm_update genres aliases)
+  JSON_EXCLUSIONS = %w(last_fm last_fm_update tags aliases)
 
   require 'open-uri'
   require 'nokogiri'
@@ -16,7 +16,7 @@ class Artist
   key :last_fm,       String
   key :last_fm_update,Time
   key :aliases,       Array, :index => true
-  key :genres,        Array, :index => true
+  key :tags,          Array, :index => true
 
   many :links
 
@@ -38,15 +38,19 @@ class Artist
 
   def update_attributes_from_last_fm! mid = false
     doc = Nokogiri::XML(self.last_fm)
-    thumb = doc.search('image[size=medium]')[0].inner_text rescue nil
+
+    thumb = (node = doc.search('image[size=medium]')[0]) && node.inner_text
     self.thumbnail = thumb unless thumb.blank?
-    tags = doc.search("artist/tags/tag/name").map{|x| x.inner_text} rescue nil
+
     if mid
       tmp = doc.search("mbid").first.inner_text rescue nil
       self.mid = (tmp.blank? ? nil : tmp)
     end
-    self.genres = tags.sort unless tags.blank? or tags.sort == self.genres
-    self.last_fm_url = doc.search('url').first.inner_text rescue nil
+
+    tmp_tags = doc.search("artist/tags/tag/name").map{|x| x.inner_text}
+    self.tags = tmp_tags.sort unless tmp_tags.blank? or tmp_tags.sort == self.tags
+
+    self.last_fm_url = (node = doc.search('url').first) && node.inner_text
     self.save!
   end
 
