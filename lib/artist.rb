@@ -91,6 +91,12 @@ class Artist
     )
   end
 
+  def self.all_matching(array)
+    all = Artist.all(:name => array) + Artist.all(:aliases => array) + Artist.all(:mid => array)
+    # this simply squashes everything of the same object id to prevent duplicates
+    all.inject({}){|hash, item| hash[item.id] = item; hash}.values
+  end
+
   def self.all_with_name_or_alias artist_names
     artist_names = [*artist_names].map{|x| x.downcase}
 

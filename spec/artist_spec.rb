@@ -59,6 +59,13 @@ describe Artist do
     end
   end
 
+  context 'flexible queries' do
+    it "finds all artists from a given query" do
+      other = Artist.create(:name => "Jump Kick Divas", :mid => "abcdefg-hijklmnop-qrstuv-wxyz")
+      Artist.all_matching(['smashing pumpkins', "ed's", other.mid]).should =~ [@@pumpkins, @@ed, other]
+    end
+  end
+
   context "#update_attributes_from_last_fm!" do
     def sample_artist last_fm
       Artist.new(:name => "something", :aliases => [], :last_fm => last_fm)

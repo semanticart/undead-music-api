@@ -30,14 +30,16 @@ post '/api/suggestions' do
 end
 
 get_or_post '/api/artists/list.json' do
-  if params[:mbids]
+  if params[:q]
+    Artist.updated_versions_of(:all_matching, params[:q].downcase.split('|'))
+  elsif params[:mbids]
     Artist.updated_versions_of(:all_with_mids, params[:mbids].split('|'))
   elsif params[:names]
     Artist.updated_versions_of(:all_with_name_or_alias, params[:names].split('|'))
   elsif params[:all]
     Artist.all
   else
-    {:error => "You must pass params.  Either pass mbids=mbid1|mbid2|mbid3 or names=name1|name2|name3 or pass all=true."}
+    {:error => "You must pass params.  Either pass mbids=mbid1|mbid2|mbid3 or names=name1|name2|name3 or q=name1|mbid1|name2|mbid2 or pass all=true."}
   end.to_json
 end
 
