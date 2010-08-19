@@ -1,5 +1,6 @@
 require File.dirname(__FILE__)+ "/spec_helper.rb"
 require File.dirname(__FILE__)+ "/../lib/link.rb"
+require File.dirname(__FILE__)+ "/../lib/suggested_link.rb"
 require File.dirname(__FILE__)+ "/../lib/artist.rb"
 
 describe Artist do
@@ -28,6 +29,12 @@ describe Artist do
       @@pumpkins.update_attributes(:links => [new_link])
 
       Artist.first_with_name_or_alias(@@pumpkins.name).links.first.count.should == 22
+    end
+  end
+
+  context 'with suggested links' do
+    it 'has associated suggested links' do
+      pending
     end
   end
 

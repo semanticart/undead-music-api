@@ -19,6 +19,7 @@ class Artist
   key :tags,          Array, :index => true
 
   many :links
+  many :suggested_links
 
   before_save :downcase_name_and_aliases
 
